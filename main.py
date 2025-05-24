@@ -33,13 +33,16 @@ with tab1:
             col_female = [col for col in filtered_df.columns if "여" in col]
             y_cols = col_male + col_female
 
-            # 연령 컬럼 추출: '연령', '나이', '연령구간' 등 자동 탐색
+            # 연령 컬럼 추출
             age_col_candidates = [col for col in filtered_df.columns if "연령" in col or "나이" in col]
             if age_col_candidates:
                 col_age = age_col_candidates[0]
             else:
-                # 없으면 두 번째 컬럼을 연령으로 가정 (실제 파일 구조에 맞게 조정)
                 col_age = filtered_df.columns[1]
+
+            # 데이터 타입 변환 (콤마 제거 + 숫자형 변환)
+            for col in y_cols:
+                filtered_df[col] = pd.to_numeric(filtered_df[col].astype(str).str.replace(",", ""), errors='coerce')
 
             if y_cols:
                 fig = px.bar(
@@ -81,13 +84,16 @@ with tab2:
                 col_age = age_col_candidates[0]
             else:
                 col_age = filtered_df.columns[1]
-            # 인구수 컬럼 (합계 등) 자동 선택
+
+            # 인구수 컬럼(합계) 자동 선택
             value_col_candidates = [col for col in filtered_df.columns if "총인구수" in col or "합계" in col or "인구수" in col]
             if value_col_candidates:
                 col_total = value_col_candidates[0]
             else:
-                # 두 번째 또는 세 번째 컬럼을 기본값으로
                 col_total = filtered_df.columns[2]
+
+            # 데이터 타입 변환 (콤마 제거 + 숫자형 변환)
+            filtered_df[col_total] = pd.to_numeric(filtered_df[col_total].astype(str).str.replace(",", ""), errors='coerce')
 
             fig2 = px.line(
                 filtered_df,
